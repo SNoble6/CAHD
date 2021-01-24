@@ -126,5 +126,6 @@ class Dataset:
         i, j = self.band_matrix.to_numpy().nonzero()
         band_bandwidth = (i - j).max() + (j - i).max() + 1
         print("default", default_bandwidth, "band", band_bandwidth)
-        self.add_sensitive_items()
+        # self.add_sensitive_items()
+        self.list_item = np.concatenate((self.list_item, self.sensitive_label))
         return self.band_matrix
