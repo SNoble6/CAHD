@@ -26,7 +26,7 @@ class CAHD:
         # new_df = self.sensitive_items.loc[a_series]
         # print("GRANCHIO\r\n", new_df)
         new_df = self.sensitive_items[(self.sensitive_items > 0).any(1)]
-        print("AIUTO LA POLIZIA\r\n", new_df)
+        print("OéPIKACHU\r\n", new_df)
         return new_df
 
     ###
@@ -48,12 +48,14 @@ class CAHD:
         nzi_row, nzi_col = self.csi.to_numpy().nonzero()
         # print("righe", nzi_row)
         # print("colonne", nzi_col)
+        for value in self.clean_sensitive_item().columns.values:
+            sensitive_histogram[value] = 0
         for i in range(0, len(nzi_row)):
             # print("riga", baba_row[i], "colonna", baba_col[i], "ovvero", bibi.columns.values[baba_col[i]])
             active_sensitive_column = self.csi.columns.values[nzi_col[i]]
             active_sensitive_row = self.csi.index.values[nzi_row[i]]
-            if active_sensitive_column not in sensitive_histogram:
-                sensitive_histogram[active_sensitive_column] = 0
+            # if active_sensitive_column not in sensitive_histogram:
+            #    sensitive_histogram[active_sensitive_column] = 0
             sensitive_histogram[active_sensitive_column] += 1
             if active_sensitive_row not in sensitive_row:
                 sensitive_row[active_sensitive_row] = list()
@@ -146,37 +148,33 @@ class CAHD:
 
         # creo tanti sub-dataframe e poi li concateno
         # print(group_dict)
-        # final_anonymized = pandas.DataFrame(dtype=numpy.int64)
+        final_anonymized = pandas.DataFrame(dtype=numpy.int64)
         # final_anonymized = pandas.Series()
         n_rows = len(self.band_matrix.index.values)
+        ccc = 0
         for group in group_dict:
-            new_row = self.band_matrix.iloc[lambda x: x.index == group]
+            for row in group_dict[group]:
+                new_row = self.band_matrix.iloc[lambda x: x.index == row]
+                counter = n_rows
+                for si in self.sensitive_histogram:
+                    if si in self.sensitive_row[group]:
+                        new_row.insert(counter, si, 1, True)
+                        counter += 1
+                    else:
+                        new_row.insert(counter, si, 0, True)
+                        counter += 1
+                # print(new_row)
+                final_anonymized = final_anonymized.append(other=new_row)
+        # final_anonymized.to_csv("zia_Marta.csv")
+        for non_sensitive_row_index in list_rows:
+            new_row = self.band_matrix.iloc[lambda x: x.index == non_sensitive_row_index]
             counter = n_rows
             for si in self.sensitive_histogram:
-                if si in self.sensitive_row[group]:
-                    new_row.insert(counter, si, 1, True)
-                    counter += 1
-                else:
-                    new_row.insert(counter, si, 0, True)
-                    counter += 1
-            print(new_row)
-            # print(len(final_anonymized))
-            break
-        '''
-        for group in group_dict:
-            # print(miao)
-            #print(self.band_matrix.iloc[group])
-            new_row = self.band_matrix.iloc[group]
-            for si in self.sensitive_histogram:
-                if si in self.sensitive_row[group]:
-                    new_row[si] = 1
-                else:
-                    new_row[si] = 0
-            print(new_row.to_frame())
+                new_row.insert(counter, si, 0, True)
+                counter += 1
             final_anonymized = final_anonymized.append(other=new_row)
-            print(final_anonymized)
-            break
-        '''
+        print(final_anonymized)
+        final_anonymized.to_csv("zia_Marta.csv")
 
     def populate_cl(self, cl, main_idx, idx, sensitive_histogram, list_sensitive_added_temp):
         if idx in self.sensitive_row:
