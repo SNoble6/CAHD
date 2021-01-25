@@ -6,7 +6,7 @@ if __name__ == "__main__":
     delimiter += 1
     items = list()
     item_set = set()
-    with open('Dataset/BMS1.csv') as csv_file:
+    with open('Dataset/BMS2.csv') as csv_file:
         csv_reader = csv.reader(csv_file, delimiter=',')
         line_count = 0
         for row in csv_reader:
@@ -31,7 +31,7 @@ if __name__ == "__main__":
 
     transaction_matrix = np.zeros((line_count, num_items))
 
-    with open('Dataset/BMS1.csv') as csv_file:
+    with open('Dataset/BMS2.csv') as csv_file:
         csv_reader = csv.reader(csv_file, delimiter=',')
         line_count = 0
         for row in csv_reader:
@@ -45,7 +45,7 @@ if __name__ == "__main__":
             ###
         csv_file.close()
 
-    with open('Dataset/BMS1_transaction_matrix.csv', 'w') as f:
+    with open('Dataset/BMS2_transaction_matrix.csv', 'w') as f:
         for row in range(0, line_count - 1):
             for col in range(0, num_items - 1):
                 f.write("%s," % int(transaction_matrix[row][col]))
@@ -56,7 +56,7 @@ if __name__ == "__main__":
         # f.write("SECONDA RIGA\n")
         f.close()
 
-    with open('Dataset/BMS1_list_item.txt', 'w') as f:
+    with open('Dataset/BMS2_list_item.txt', 'w') as f:
         for i in range(0, num_items - 1):
             f.write("%s\n" % items[i])
         f.write("%s" % items[num_items - 1])

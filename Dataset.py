@@ -121,11 +121,22 @@ class Dataset:
         plt.colorbar()
         # plt.draw()
 
-        i, j = graph.nonzero()
-        default_bandwidth = (i - j).max() + (j - i).max() + 1
-        i, j = self.band_matrix.to_numpy().nonzero()
-        band_bandwidth = (i - j).max() + (j - i).max() + 1
-        print("default", default_bandwidth, "band", band_bandwidth)
+        #i, j = graph.nonzero()
+        #default_bandwidth = (i - j).max() + (j - i).max() + 1
+        #i, j = self.band_matrix.to_numpy().nonzero()
+        #band_bandwidth = (i - j).max() + (j - i).max() + 1
+
+        # banda dataframe inizale
+        [i, j] = np.where(square_matrix == 1)
+        bw = max(i - j) + 1
+        print("Bandwidth first RCM", bw)
+
+        # banda dataframe dopo RCM
+        [i, j] = np.where(self.band_matrix == 1)
+        bw = max(i - j) + 1
+        print("Bandwidth after RCM", bw)
+
+        # print("default", default_bandwidth, "band", band_bandwidth)
         # self.add_sensitive_items()
         self.list_item = np.concatenate((self.list_item, self.sensitive_label))
         return self.band_matrix
