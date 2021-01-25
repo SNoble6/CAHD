@@ -121,9 +121,11 @@ class CAHD:
         # final_anonymized = pandas.DataFrame()
         # n_rows = len(self.band_matrix.index.values)
 
+        counter = 0
         for group in group_dict:
+            counter += 1
             final_anonymized = pandas.DataFrame()
-            print("GRUPPO con Sensitive Item", self.sensitive_row[group])
+            print("GRUPPO con Sensitive Item", self.sensitive_row[group], "numero", counter)
             for row in group_dict[group]:
                 new_row = self.band_matrix.iloc[lambda x: x.index == row]
                 """

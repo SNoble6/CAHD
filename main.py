@@ -4,7 +4,7 @@
 # Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
 from Dataset import Dataset
 from CAHD import CAHD
-from matplotlib.pyplot import show
+from matplotlib.pylab import show
 
 
 def print_hi(name):
@@ -18,13 +18,14 @@ if __name__ == '__main__':
     dim_dataset = 1000
     p = 10
     num_sensitive_items = 10
+    dataset_name = 'BMS2'
 
-    list_item_path = 'Dataset/BMS2_list_item.txt'
-    transaction_item = 'Dataset/BMS2_transaction_matrix.csv'
+    list_item_path = 'Dataset/' + dataset_name + '_list_item.txt'
+    transaction_item = 'Dataset/' + dataset_name + '_transaction_matrix.csv'
     dataset = Dataset(list_item_path=list_item_path, dataset_path=transaction_item)
     band_matrix = dataset.compute_band_matrix(num_sens_items=num_sensitive_items, dim_dataset=dim_dataset)
-    #print("BAND", band_matrix)
-    #dataset.sensitive_items.to_csv("zio_gino.csv")
+    # print("BAND", band_matrix)
+    # dataset.sensitive_items.to_csv("zio_gino.csv")
     lol = CAHD(alfa, p, band_matrix, dataset.sensitive_items)
     # lol.clean_sensitive_item()
     # lol.create_histogram()

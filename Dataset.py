@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 from scipy.sparse.csgraph import reverse_cuthill_mckee
 from scipy.sparse import csr_matrix
-import matplotlib.pyplot as plt
+import matplotlib.pylab as plt
 
 
 class Dataset:
@@ -26,9 +26,9 @@ class Dataset:
         # print(self.list_item)
         # np.savetxt('test_item.txt', self.list_item, delimiter='\n')
 
-    def random_sensitive_items(self):
+    def random_sensitive_items(self, columns):
         # result = np.random.choice(self.list_item, size=self.num_sensitive_items)
-        self.list_sensitive_items = np.random.permutation(range(0, self.num_item))[:self.num_sensitive_items]
+        self.list_sensitive_items = np.random.permutation(columns)[:self.num_sensitive_items]
 
     def save_sensitive_items(self):
         self.sensitive_items = pd.DataFrame()
@@ -61,39 +61,60 @@ class Dataset:
         :param dim_dataset: :param num_sens_items: :return:
         """
         self.num_sensitive_items = num_sens_items
-        # self.list_sensitive_items = self.random_sensitive_items()
-        self.random_sensitive_items()
-        print("SENSITIVE index", self.list_sensitive_items)
-        self.save_sensitive_items()
 
-        k = len(self.list_item) + num_sens_items
-        for i in range(k, dim_dataset + num_sens_items):
-            self.list_item = np.append(self.list_item, values=-i)
-            self.dataset[i] = 0
+        if len(self.list_item) > dim_dataset + num_sens_items:
+            random_row = np.random.permutation(self.dataset.shape[0])[:dim_dataset]
+            random_col = np.random.permutation(self.dataset.shape[1])[:dim_dataset + num_sens_items]
 
-        # print(self.list_item)
-        # print(len(self.list_item), "lunghezza. ITEM", self.list_item)
+            temp_list_item = self.list_item
 
-        random_row = np.random.permutation(self.dataset.shape[0])[:dim_dataset]
-        # random_col = np.random.permutation(self.list_item)[:dim_dataset]
-        random_col = np.random.permutation(self.dataset.columns)[:dim_dataset]
+            square_matrix = self.dataset.iloc[random_row][random_col]
+            self.random_sensitive_items(square_matrix.columns)
 
-        permutation_list_item_index = list()
+            self.save_sensitive_items()
 
-        for i in random_col:
-            if i >= k:
-                permutation_list_item_index.append(i - num_sens_items)
-            else:
-                permutation_list_item_index.append(i)
-        permutation_list_item_index = np.array(permutation_list_item_index)
-        self.list_item = self.list_item[permutation_list_item_index]
+            for i in self.list_sensitive_items:
+                # print("len prima", len(random_col))
+                random_col = random_col[random_col != i]
+                # print("len dopo", len(random_col))
 
-        # print("col", len(random_col))
-        # print("row", len(random_row))
-        square_matrix = self.dataset.iloc[random_row][random_col]
-        self.sensitive_items = self.sensitive_items.iloc[random_row][:dim_dataset]
-        # print("SQUARE")
-        # print(square_matrix)
+            self.list_item = temp_list_item[random_col]
+            square_matrix = self.dataset.iloc[random_row][random_col]
+
+        else:
+            # self.list_sensitive_items = self.random_sensitive_items()
+            self.random_sensitive_items(self.dataset.columns)
+            print("SENSITIVE index", self.list_sensitive_items)
+            self.save_sensitive_items()
+
+            k = len(self.list_item) + num_sens_items
+            for i in range(k, dim_dataset + num_sens_items):
+                self.list_item = np.append(self.list_item, values=-i)
+                self.dataset[i] = 0
+
+            # print(self.list_item)
+            # print(len(self.list_item), "lunghezza. ITEM", self.list_item)
+
+            random_row = np.random.permutation(self.dataset.shape[0])[:dim_dataset]
+            # random_col = np.random.permutation(self.list_item)[:dim_dataset]
+            random_col = np.random.permutation(self.dataset.columns)[:dim_dataset]
+
+            permutation_list_item_index = list()
+
+            for i in random_col:
+                if i >= k:
+                    permutation_list_item_index.append(i - num_sens_items)
+                else:
+                    permutation_list_item_index.append(i)
+            permutation_list_item_index = np.array(permutation_list_item_index)
+            self.list_item = self.list_item[permutation_list_item_index]
+
+            # print("col", len(random_col))
+            # print("row", len(random_row))
+            square_matrix = self.dataset.iloc[random_row][random_col]
+            self.sensitive_items = self.sensitive_items.iloc[random_row][:dim_dataset]
+            # print("SQUARE")
+            # print(square_matrix)
 
         graph = csr_matrix(square_matrix)
         new_order = reverse_cuthill_mckee(graph)
@@ -113,14 +134,17 @@ class Dataset:
         # print(self.band_matrix)
 
         # plottiamo le figure
-        plt.figure(1)
+        '''plt.figure(1)
         plt.imshow(square_matrix, cmap='jet')
         plt.colorbar()
         plt.figure(2)
         plt.imshow(self.band_matrix, cmap='jet')
-        plt.colorbar()
+        plt.colorbar()'''
         # plt.draw()
-
+        f, (ax1, ax2) = plt.subplots(1, 2, sharey=True)
+        ax1.spy(square_matrix, marker='.', markersize='1')
+        ax2.spy(self.band_matrix, marker='.', markersize='1')
+        plt.draw()
         #i, j = graph.nonzero()
         #default_bandwidth = (i - j).max() + (j - i).max() + 1
         #i, j = self.band_matrix.to_numpy().nonzero()
