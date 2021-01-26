@@ -21,7 +21,6 @@ class CAHD:
 
     def clean_sensitive_item(self):
         new_df = self.sensitive_items[(self.sensitive_items != 0).any(1)]
-        #print("OéPIKACHU\r\n", new_df)
         return new_df
 
     ###
@@ -118,42 +117,30 @@ class CAHD:
             else:
                 continue
 
-        # final_anonymized = pandas.DataFrame()
-        # n_rows = len(self.band_matrix.index.values)
-
         counter = 0
+
+        result = dict()
+
         for group in group_dict:
             counter += 1
             final_anonymized = pandas.DataFrame()
             print("GRUPPO con Sensitive Item", self.sensitive_row[group], "numero", counter)
             for row in group_dict[group]:
                 new_row = self.band_matrix.iloc[lambda x: x.index == row]
-                """
-                counter = n_rows
-                for si in self.sensitive_histogram:
-                    if si in self.sensitive_row[group]:
-                        new_row.insert(counter, si, 1, True)
-                        counter += 1
-                    else:
-                        new_row.insert(counter, si, 0, True)
-                        counter += 1
-                """
                 final_anonymized = final_anonymized.append(other=new_row)
+            result[group] = final_anonymized
             print(final_anonymized)
+        #return result
         #final_anonymized.to_csv("zia_Marta.csv")
 
         final_anonymized = pandas.DataFrame()
         for non_sensitive_row_index in list_rows:
             new_row = self.band_matrix.iloc[lambda x: x.index == non_sensitive_row_index]
             final_anonymized = final_anonymized.append(other=new_row)
-            '''
-            counter = n_rows
-            for si in self.sensitive_histogram:
-                new_row.insert(counter, si, 0, True)
-                counter += 1
-            '''
         print("GRUPPO non sensitive")
         print(final_anonymized)
+        result[-1] = final_anonymized
+        return result
         #final_anonymized.to_csv("zia_Marta.csv")
 
     def populate_cl(self, cl, main_idx, idx, sensitive_histogram, list_sensitive_added_temp):

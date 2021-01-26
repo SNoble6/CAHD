@@ -18,6 +18,8 @@ if __name__ == '__main__':
     dim_dataset = 1000
     p = 10
     num_sensitive_items = 10
+    # dim pattern
+    r = 4
     dataset_name = 'BMS2'
 
     list_item_path = 'Dataset/' + dataset_name + '_list_item.txt'
@@ -26,10 +28,12 @@ if __name__ == '__main__':
     band_matrix = dataset.compute_band_matrix(num_sens_items=num_sensitive_items, dim_dataset=dim_dataset)
     # print("BAND", band_matrix)
     # dataset.sensitive_items.to_csv("zio_gino.csv")
-    lol = CAHD(alfa, p, band_matrix, dataset.sensitive_items)
+    groups = CAHD(alfa, p, band_matrix, dataset.sensitive_items)
     # lol.clean_sensitive_item()
     # lol.create_histogram()
     # lol.qid_similiarity()
-    lol.create_groups()
+    group_dict = groups.create_groups()
 
+
+    #group_dict[list(groups.sensitive_row.keys())[0]].to_csv("zio_Claudio")
     show()
