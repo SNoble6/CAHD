@@ -41,27 +41,27 @@ class CAHD:
         mentre l'altro associa alla riga contenente sensitive item una lista dei sensitive item contenuti. 
         """
         # Get ndArray of all column names
-        sensitive_histogram = dict() 
+        sensitive_histogram = dict()
         sensitive_row = dict()
-        
+
         # csi sta per clean sensitive item
         self.csi = self.clean_sensitive_item()
-        print(self.csi)
+        #print(self.csi)
         nzi_row, nzi_col = self.csi.to_numpy().nonzero()
-        
+
         for value in self.clean_sensitive_item().columns.values:
             sensitive_histogram[value] = 0
-            
+
         for i in range(0, len(nzi_row)):
             active_sensitive_column = self.csi.columns.values[nzi_col[i]]
             active_sensitive_row = self.csi.index.values[nzi_row[i]]
             sensitive_histogram[active_sensitive_column] += 1
-            
+
             if active_sensitive_row not in sensitive_row:
                 sensitive_row[active_sensitive_row] = list()
-                
+
             sensitive_row[active_sensitive_row].append(active_sensitive_column)
-            
+
         self.sensitive_row = sensitive_row
         self.sensitive_histogram = sensitive_histogram
         self.histogram_for_KL = sensitive_histogram
@@ -77,18 +77,17 @@ class CAHD:
         """
         row_len_dict = dict()
         count = 0
-        
+
         for row in cl:
             row_len_dict[count] = len(t.compare(row))
             count += 1
-            
         ordered_dict = sorted(row_len_dict.items(), key=lambda kv: (kv[1], kv[0]))
         result = list()
         result.append(t.name)
-        
+
         for i in range(0, self.p - 1):
             result.append(cl[ordered_dict[i][0]].name)
-            
+
         return result
 
     def check_if_already_in(self, index, list_sensitive_added):
@@ -118,53 +117,93 @@ class CAHD:
         list_sensitive_added = list()
         group_dict = dict()
 
-        for j in self.csi.index.values:
-            list_sensitive_added_temp = list_sensitive_added.copy()
+        value = 1
+        old_value = 0
 
-            if self.check_if_already_in(j, list_sensitive_added):
-                continue
+        while value > 0:
 
-            t = self.band_matrix.loc[j, :]
-            temp_histogram = self.sensitive_histogram.copy()
+            for j in self.csi.index.values:
+                # print("Lunghezza", len(self.csi.index.values))
+                list_sensitive_added_temp = list_sensitive_added.copy()
 
-            for si in self.sensitive_row[j]:
-                temp_histogram[si] -= 1
+                if self.check_if_already_in(j, list_sensitive_added):
+                    continue
 
-            cl[j] = list()
+                t = self.band_matrix.loc[j, :]
+                temp_histogram = self.sensitive_histogram.copy()
 
-            index = numpy.where(list_rows == j)[0][0]
+                cl[j] = list()
 
-            pos_idx = index + 1
-            neg_idx = index - 1
-            counter = 0
-            stop = self.alpha * self.p
+                index = numpy.where(list_rows == j)[0][0]
 
-            while counter < 2 * stop:
+                pos_idx = index + 1
+                neg_idx = index - 1
+                counter = 0
+                stop = self.alpha * self.p
 
-                if neg_idx > 0:
-                    counter += self.populate_cl(cl, j, list_rows[neg_idx], temp_histogram, list_sensitive_added_temp)
-                    neg_idx -= 1
+                while counter < 2 * stop:
 
-                if pos_idx < remaining:
-                    counter += self.populate_cl(cl, j, list_rows[pos_idx], temp_histogram, list_sensitive_added_temp)
-                    pos_idx += 1
+                    if neg_idx >= 0:
+                        counter += self.populate_cl(cl, j, list_rows[neg_idx], temp_histogram, list_sensitive_added_temp)
+                        neg_idx -= 1
 
-            list_similar = self.qid_similarity(cl[j], t)
+                    if pos_idx < remaining:
+                        counter += self.populate_cl(cl, j, list_rows[pos_idx], temp_histogram, list_sensitive_added_temp)
+                        pos_idx += 1
 
-            if self.privacy_requisite_chek(remaining, temp_histogram):
+                    if pos_idx > remaining and neg_idx < -1:
+                        print("QUALCOSA è ESPLOSO")
+                        return -1
 
-                for elem in list_similar:
-                    list_rows = list_rows[list_rows != elem]
+                list_similar = self.qid_similarity(cl[j], t)
 
-                remaining = len(list_rows)
-                # inserisco il gruppo nella mia struttura a dict
-                group_dict[t.name] = list_similar
-                list_sensitive_added = list_sensitive_added_temp
-                self.sensitive_histogram = temp_histogram
-                pass
+                for idx in list_similar:
+                    if idx in self.sensitive_row:
+                        # print("aggiungo", idx, "agli aggiunti")
+                        list_sensitive_added_temp.append(idx)
+                        # print("levo",  self.sensitive_row[idx], "da gruppo", self.sensitive_row[j])
+                        for si in self.sensitive_row[idx]:
+                            temp_histogram[si] -= 1
+                #print(temp_histogram)
 
-            else:
-                continue
+                if self.privacy_requisite_chek(remaining, temp_histogram):
+
+                    for elem in list_similar:
+                        list_rows = list_rows[list_rows != elem]
+
+                    remaining = len(list_rows)
+                    # inserisco il gruppo nella mia struttura a dict
+                    group_dict[t.name] = list_similar
+                    list_sensitive_added = list_sensitive_added_temp
+                    self.sensitive_histogram = temp_histogram
+                    pass
+
+                else:
+                    print("ENTRATI QUA")
+                    # controlla se funziona!!! devi ripristinare istogramma e list similiar
+                    # ah no che idiota non serve... o è meglio fare così invece che avere i temp?
+                    # perchè secondo me è meglio così costa meno! ;)
+                    # cioè è più probabile che le cose vadano bene credo
+                    #for idx in list_similar:
+                    #    list_sensitive_added_temp.remove(idx)
+                    #    if idx in self.sensitive_row:
+                    #        for si in self.sensitive_row[idx]:
+                    #            temp_histogram[si] += 1
+                    # a questo punto prima di fare i gruppi devo riesaminare questo!!! mettilo in una lista zi
+                    # NON SERVE!!! HO L'ISTOGRAMMA CHE FUNZIA
+                    continue
+            print("siamo qua", list_sensitive_added)
+            value = 0
+            for histogram_value in self.sensitive_histogram.items():
+                value += histogram_value[1]
+            if value > 0 and old_value == value:
+                # l'istogramma non è cambiato quindi non posso migliorare nulla
+                print("STACCA TUTTO!!!! (grado di privacy non soddisfacibile! ;( )")
+                return -1
+            elif value > 0:
+                old_value = value
+
+        print("andata bene => grado di privacy soddisfacibile.")
 
         counter = 0
 
@@ -183,14 +222,18 @@ class CAHD:
             print(final_anonymized)
 
         final_anonymized = pandas.DataFrame()
-
+        c = 0
         for non_sensitive_row_index in list_rows:
             new_row = self.band_matrix.iloc[lambda x: x.index == non_sensitive_row_index]
+            c += 1
+            #print(c)
             final_anonymized = final_anonymized.append(other=new_row)
+        #print(list_rows)
 
         print("GRUPPO non sensitive")
         print(final_anonymized)
         result[-1] = final_anonymized
+
         print(self.sensitive_histogram)
         return result
 
@@ -212,10 +255,10 @@ class CAHD:
                         return 0
 
             # aggiorno histogram
-            list_sensitive_added_temp.append(idx)
+            # list_sensitive_added_temp.append(idx)
 
-            for si in self.sensitive_row[idx]:
-                sensitive_histogram[si] -= 1
+            # for si in self.sensitive_row[idx]:
+            #    sensitive_histogram[si] -= 1
         cl[main_idx].append(self.band_matrix.loc[idx, :])
 
         return 1
