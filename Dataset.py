@@ -97,7 +97,7 @@ class Dataset:
 
         else:
             self.random_sensitive_items(self.dataset.columns)
-            print("SENSITIVE index", self.list_sensitive_items)
+            # print("SENSITIVE index", self.list_sensitive_items)
             self.save_sensitive_items()
 
             k = len(self.list_item) + num_sens_items
