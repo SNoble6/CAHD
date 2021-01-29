@@ -139,9 +139,10 @@ class Dataset:
         plt.imshow(self.band_matrix, cmap='jet')
         plt.colorbar()'''
         # plt.draw()
-        f, (ax1, ax2) = plt.subplots(1, 2, sharey=True)
-        ax1.spy(square_matrix, marker='.', markersize='1')
-        ax2.spy(self.band_matrix, marker='.', markersize='1')
+        # TODO: remove comment
+        # f, (ax1, ax2) = plt.subplots(1, 2, sharey=True)
+        # ax1.spy(square_matrix, marker='.', markersize='1')
+        # ax2.spy(self.band_matrix, marker='.', markersize='1')
 
         '''i, j = graph.nonzero()
         default_bandwidth = (i - j).max() + (j - i).max() + 1
