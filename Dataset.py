@@ -151,12 +151,13 @@ class Dataset:
         # banda dataframe inizale
         [i, j] = np.where(square_matrix == 1)
         bw = max(i - j) + 1
-        print("Bandwidth first RCM", bw)
+        # TODO: REMOVE 2 COMMENT
+        # print("Bandwidth first RCM", bw)
 
         # banda dataframe dopo RCM
         [i, j] = np.where(self.band_matrix == 1)
         bw = max(i - j) + 1
-        print("Bandwidth after RCM", bw)
+        # print("Bandwidth after RCM", bw)
 
         self.add_sensitive_items()
         return self.band_matrix
