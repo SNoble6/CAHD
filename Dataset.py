@@ -63,6 +63,11 @@ class Dataset:
         #     self.band_matrix[item] = self.sensitive_items[item].copy()
         self.list_item = np.concatenate((self.list_item, self.sensitive_label))
 
+    def remove_fake_items(self, k):
+        for i in range(k, self.dim_dataset + self.num_sensitive_items):
+            self.list_item = np.delete(self.list_item, np.where(self.list_item == -i))
+            self.band_matrix.drop(columns=i, axis=1, inplace=True)
+
     def compute_band_matrix(self, dim_dataset=1000, num_sens_items=10):
         """
         Funzione per il calcolo di una band matrix dim_dataset x dim_dataset
@@ -76,6 +81,7 @@ class Dataset:
         :return: la band matrix
         """
         self.num_sensitive_items = num_sens_items
+        self.dim_dataset = dim_dataset
 
         if len(self.list_item) > dim_dataset + num_sens_items:
             random_row = np.random.permutation(self.dataset.shape[0])[:dim_dataset]
@@ -94,6 +100,7 @@ class Dataset:
             self.list_item = temp_list_item[random_col]
             square_matrix = self.dataset.iloc[random_row][random_col]
             self.num_item = dim_dataset
+            fake_item_added = False
 
         else:
             self.random_sensitive_items(self.dataset.columns)
@@ -104,6 +111,8 @@ class Dataset:
             for i in range(k, dim_dataset + num_sens_items):
                 self.list_item = np.append(self.list_item, values=-i)
                 self.dataset[i] = 0
+
+            fake_item_added = True
 
             random_row = np.random.permutation(self.dataset.shape[0])[:dim_dataset]
             random_col = np.random.permutation(self.dataset.columns)[:dim_dataset]
@@ -154,6 +163,9 @@ class Dataset:
         print(f"Bandwidth before RCM: {default_bandwidth}")
         print(f"Bandwidth after RCM: {band_bandwidth}")
         print(f"Bandwidth reduction: {default_bandwidth - band_bandwidth}")
+
+        # if fake_item_added:
+        #    self.remove_fake_items(k)
 
         self.add_sensitive_items()
         return self.band_matrix

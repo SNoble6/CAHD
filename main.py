@@ -11,7 +11,7 @@ if __name__ == '__main__':
     # dimensione del dataset da analizzare
     dim_dataset = 1000
     # grado di privacy
-    p = 31
+    p = 10
     # numero sensitive item da estrarre randomicamente
     num_sensitive_items = 10
     # dim pattern
@@ -29,7 +29,7 @@ if __name__ == '__main__':
     start_time = time.time()
     band_matrix = dataset.compute_band_matrix(num_sens_items=num_sensitive_items, dim_dataset=dim_dataset)
 
-    end_time = time.time()-start_time
+    end_time = time.time() - start_time
     print("")
     print(f"Band matrix computed in {end_time} seconds.")
     print("")
