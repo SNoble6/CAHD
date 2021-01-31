@@ -46,7 +46,6 @@ class CAHD:
 
         # csi sta per clean sensitive item
         self.csi = self.clean_sensitive_item()
-        # print(self.csi)
         nzi_row, nzi_col = self.csi.to_numpy().nonzero()
 
         for value in self.clean_sensitive_item().columns.values:
@@ -65,7 +64,6 @@ class CAHD:
         self.sensitive_row = sensitive_row
         self.sensitive_histogram = sensitive_histogram
         self.histogram_for_KL = sensitive_histogram.copy()
-        # print("TEST", sensitive_histogram)
 
     def qid_similarity(self, cl, t):
         """
@@ -85,10 +83,7 @@ class CAHD:
         result = list()
         result.append(t.name)
 
-        # for x in cl:
-        #    print("cl pikachu", x.name, len(cl))
         for i in range(0, self.p - 1):
-            # print("ORDERED PIKACHU", ordered_dict[i][0])
             result.append(cl[ordered_dict[i][0]].name)
 
         return result
@@ -125,15 +120,11 @@ class CAHD:
 
         while value > 0:
             for j in self.csi.index.values:
-                # print("Lunghezza", len(self.csi.index.values))
-                # list_sensitive_added_temp = list_sensitive_added.copy()
 
                 if self.check_if_already_in(j, list_sensitive_added):
-                    # print(j, "c'era già")
                     continue
 
                 t = self.band_matrix.loc[j, :]
-                # temp_histogram = self.sensitive_histogram.copy()
 
                 cl[j] = list()
 
@@ -157,11 +148,10 @@ class CAHD:
                         pos_idx += 1
 
                     if pos_idx == remaining and neg_idx == -1:
-                        # print("non riesco a creare una candidate list così grande")
-                        # print("lunghezza", len(cl[j]), "serve", stop, "p è", self.p)
+
                         if len(cl[j]) < self.p - 1:
-                            # print("allora continue")
                             not_groupable = True
+
                         break
 
                 if not_groupable:
@@ -171,12 +161,9 @@ class CAHD:
 
                 for idx in list_similar:
                     if idx in self.sensitive_row:
-                        # print("aggiungo", idx, "agli aggiunti")
                         list_sensitive_added.append(idx)
-                        # print("levo",  self.sensitive_row[idx], "da gruppo", self.sensitive_row[j])
                         for si in self.sensitive_row[idx]:
                             self.sensitive_histogram[si] -= 1
-                # print(temp_histogram)
 
                 if self.privacy_requisite_chek(remaining):
 
@@ -184,40 +171,33 @@ class CAHD:
                         list_rows = list_rows[list_rows != elem]
 
                     remaining = len(list_rows)
-                    # inserisco il gruppo nella mia struttura a dict
+                    # inserisco il gruppo nella struttura a dict
                     group_dict[t.name] = list_similar
-                    # list_sensitive_added = list_sensitive_added_temp
-                    # self.sensitive_histogram = temp_histogram
                     pass
 
                 else:
-                    # print("requisiti di privacy non soddisfacibili, provo con la SR successiva.")
-                    # controlla se funziona!!! devi ripristinare istogramma e list similiar
-                    # ah no che idiota non serve... o è meglio fare così invece che avere i temp?
-                    # perchè secondo me è meglio così costa meno! ;)
-                    # cioè è più probabile che le cose vadano bene credo
                     for idx in list_similar:
                         # print(list_sensitive_added, idx)
                         if idx in self.sensitive_row:
                             list_sensitive_added.remove(idx)
                             for si in self.sensitive_row[idx]:
                                 self.sensitive_histogram[si] += 1
-                    # a questo punto prima di fare i gruppi devo riesaminare questo!!! mettilo in una lista zi
-                    # NON SERVE!!! HO L'ISTOGRAMMA CHE FUNZIA
                     continue
-            # print("siamo qua", self.sensitive_histogram)
-            # print(remaining)
+
             value = 0
+
             for histogram_value in self.sensitive_histogram.items():
                 value += histogram_value[1]
+
             if value > 0 and old_value == value:
                 # l'istogramma non è cambiato quindi non posso migliorare nulla
-                # print("STACCA TUTTO!!!! (grado di privacy non soddisfacibile! ;( )")
+                print(f"Grado di privacy {self.p} non soddisfacibile")
                 return -1
+
             elif value > 0:
                 old_value = value
 
-        # print("andata bene => grado di privacy soddisfacibile.")
+        print("Grado di privacy soddisfacibile.")
 
         counter = 0
 
@@ -226,7 +206,7 @@ class CAHD:
         for group in group_dict:
             counter += 1
             final_anonymized = pandas.DataFrame()
-            # print("GRUPPO con Sensitive Item", self.sensitive_row[group], "numero", counter)
+            # print("GRUPPO", counter, "con Sensitive Item", self.sensitive_row[group])
 
             for row in group_dict[group]:
                 new_row = self.band_matrix.iloc[lambda x: x.index == row]
@@ -239,24 +219,19 @@ class CAHD:
         for non_sensitive_row_index in list_rows:
             new_row = self.band_matrix.iloc[lambda x: x.index == non_sensitive_row_index]
             final_anonymized = final_anonymized.append(other=new_row)
-        # print(list_rows)
 
-        # print("GRUPPO non sensitive")
+        # print("GRUPPO", (counter + 1), "non sensitive")
         # print(final_anonymized)
         result[-1] = final_anonymized
 
-        # print(self.sensitive_histogram)
         return result
 
     def populate_cl(self, cl, main_idx, idx):
         """
         Funzione che decreta se aggiungere la riga idx alla candidate list.
-        Se la riga viene aggiunta, aggiorna i dizionari sensitive row e sensitive histogram
         :param cl: candidate list
         :param main_idx: indice della riga sensitive che sto analizzando
         :param idx: candidata ad entrare nella candidate list
-        :param sensitive_histogram: istogramma dei sensitive item
-        :param list_sensitive_added_temp: lista che tiene traccia delle sensitive transaction già aggiunte a gruppi
         :return: 1 se aggiunge, 0 se non aggiunge
         """
         if idx in self.sensitive_row:

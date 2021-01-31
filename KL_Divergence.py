@@ -1,8 +1,7 @@
 import itertools
 import operator
-import random
 from math import log10 as log
-
+import numpy as np
 import pandas
 
 
@@ -30,7 +29,6 @@ class KL_Divergence:
         :return: il risultato della divisione
         """
         # numero occorrenze di s nel dataset
-        # print("occorrenze di si in T", self.sensitive_histogram[si])
         denominator = self.sensitive_histogram[si]
         # numero occorrenze di s in C
         # dobbiamo fare for su sensitive rows
@@ -41,20 +39,19 @@ class KL_Divergence:
 
         for row, items in self.sensitive_rows.items():
             if si in items:
-                # print(si, "è in", row)
+
                 matching_row = self.band_matrix.loc[row, selected_QID]
                 if len(my_row.compare(matching_row)) == 0:
                     occurrences += 1
                 # poi vedere quali tra queste righe rispettano il pattern
 
         result = float(occurrences) / float(denominator)
-        # print(result)
+
         return result
 
     def compute_Est(self, selected_QID, my_row, si):
 
         # numero occorrenze di s nel dataset
-        # print("occorrenze di si in T", self.sensitive_histogram[si])
         denominator = float(self.sensitive_histogram[si])
 
         # my_row = pandas.Series(combination, index=selected_QID)
@@ -79,24 +76,22 @@ class KL_Divergence:
 
         return numerator / denominator
 
-    # devo farla per ogni s, occhio che in un gruppo posso avere piu di una s
     def compute_kl_divergence(self):
         # devo estrarre a caso r QID, come label
         # devo ottenere tutte le combinazioni di 1 e 0 di r elementi => 2^r
-        # print(self.sensitive_histogram)
-        # fai la prova con histogram con tutti value uguali
+
         si = max(self.sensitive_histogram.items(), key=operator.itemgetter(1))[0]
-        # print("SI", si)
-        new_list = list(self.band_matrix.columns.values)[:]
-        random.shuffle(new_list)
+
+        # new_list = list(self.band_matrix.columns.values)[:]
+        # random.shuffle(new_list)
+        new_list = np.random.permutation(self.band_matrix.columns.values)
         selected_QID = new_list[-self.r:]
-        # print(selected_QID)
+
         lst = [list(i) for i in itertools.product([0, 1], repeat=self.r)]
 
         final_result = 0.0
 
         for combination in lst:
-            # idea è di usare compare tra series
             my_row = pandas.Series(combination, index=selected_QID)
             act = self.compute_Act(selected_QID, my_row, si)
             est = self.compute_Est(selected_QID, my_row, si)
@@ -104,6 +99,6 @@ class KL_Divergence:
             if est != 0 and act != 0:
                 final_result += act * log(act / est)
             final_result += 0.0
-        # TODO: REMOVE COMMENT
-        # print(final_result)
+
+        print(f"Kl-Divergence value: {final_result}")
         return final_result

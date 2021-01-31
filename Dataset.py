@@ -59,8 +59,8 @@ class Dataset:
         alla list item
         """
 
-        '''for item in self.list_sensitive_items:
-            self.band_matrix[item] = self.sensitive_items[item].copy()'''
+        # for item in self.list_sensitive_items:
+        #     self.band_matrix[item] = self.sensitive_items[item].copy()
         self.list_item = np.concatenate((self.list_item, self.sensitive_label))
 
     def compute_band_matrix(self, dim_dataset=1000, num_sens_items=10):
@@ -132,33 +132,28 @@ class Dataset:
         self.sensitive_items = self.sensitive_items.iloc[new_order][:dim_dataset]
 
         # plottiamo le figure
-        '''plt.figure(1)
-        plt.imshow(square_matrix, cmap='jet')
-        plt.colorbar()
-        plt.figure(2)
-        plt.imshow(self.band_matrix, cmap='jet')
-        plt.colorbar()'''
+        # plt.figure(1)
+        # plt.imshow(square_matrix, cmap='jet')
+        # plt.colorbar()
+        # plt.figure(2)
+        # plt.imshow(self.band_matrix, cmap='jet')
+        # plt.colorbar()
         # plt.draw()
-        # TODO: remove comment
-        # f, (ax1, ax2) = plt.subplots(1, 2, sharey=True)
-        # ax1.spy(square_matrix, marker='.', markersize='1')
-        # ax2.spy(self.band_matrix, marker='.', markersize='1')
+        f, (ax1, ax2) = plt.subplots(1, 2, sharey=True)
+        ax1.spy(square_matrix, marker='.', markersize='1')
+        ax2.spy(self.band_matrix, marker='.', markersize='1')
 
-        '''i, j = graph.nonzero()
-        default_bandwidth = (i - j).max() + (j - i).max() + 1
+        # banda prima di RCM
+        i, j = graph.nonzero()
+        default_bandwidth = (i - j).max() + 1
+
+        # banda dopo RCM
         i, j = self.band_matrix.to_numpy().nonzero()
-        band_bandwidth = (i - j).max() + (j - i).max() + 1'''
+        band_bandwidth = (i - j).max() + 1
 
-        # banda dataframe inizale
-        [i, j] = np.where(square_matrix == 1)
-        bw = max(i - j) + 1
-        # TODO: REMOVE 2 COMMENT
-        # print("Bandwidth first RCM", bw)
-
-        # banda dataframe dopo RCM
-        [i, j] = np.where(self.band_matrix == 1)
-        bw = max(i - j) + 1
-        # print("Bandwidth after RCM", bw)
+        print(f"Bandwidth before RCM: {default_bandwidth}")
+        print(f"Bandwidth after RCM: {band_bandwidth}")
+        print(f"Bandwidth reduction: {default_bandwidth - band_bandwidth}")
 
         self.add_sensitive_items()
         return self.band_matrix
