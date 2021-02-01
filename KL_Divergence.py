@@ -101,7 +101,6 @@ class KL_Divergence:
 
             if est != 0 and act != 0:
                 final_result += act * log(act / est)
-            final_result += 0.0
 
         print(f"Kl-Divergence value: {final_result}")
         return final_result
