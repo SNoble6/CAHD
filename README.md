@@ -16,4 +16,4 @@ To run the script, just launch [Main.py](https://github.com/SNoble6/CAHD/blob/ma
 ```
 python Main.py
 ```
-Parameters can be modified if needed.
+Parameters can be modified in [Main.py](https://github.com/SNoble6/CAHD/blob/main/main.py) if needed.
