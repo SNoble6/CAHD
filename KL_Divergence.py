@@ -39,8 +39,8 @@ class KL_Divergence:
 
         for row, items in self.sensitive_rows.items():
             if si in items:
-
                 matching_row = self.band_matrix.loc[row, selected_QID]
+
                 if len(my_row.compare(matching_row)) == 0:
                     occurrences += 1
                 # poi vedere quali tra queste righe rispettano il pattern
@@ -52,18 +52,20 @@ class KL_Divergence:
     def compute_Est(self, selected_QID, my_row, si):
 
         # numero occorrenze di s nel dataset
-        denominator = float(self.sensitive_histogram[si])
+        # denominator = float(self.sensitive_histogram[si])
 
         # my_row = pandas.Series(combination, index=selected_QID)
 
         a = 1
-        dim_G = self.p
+        dim_G = 0
         b = 0
 
         for row, group_df in self.groups.items():
 
             if si not in self.sensitive_rows[row]:
                 continue
+
+            dim_G += self.p
 
             temp_df = group_df.loc[:, selected_QID]
             for group_row in temp_df.iterrows():
@@ -74,7 +76,8 @@ class KL_Divergence:
 
         numerator = float(a * b) / float(dim_G)
 
-        return numerator / denominator
+        return numerator
+        # return numerator / denominator
 
     def compute_kl_divergence(self):
         # devo estrarre a caso r QID, come label

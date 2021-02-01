@@ -15,6 +15,7 @@ class Dataset:
     dim_dataset = None
     band_matrix = None
     sensitive_label = None
+    k = None
 
     def __init__(self, dataset_path, list_item_path):
         """
@@ -63,8 +64,8 @@ class Dataset:
         #     self.band_matrix[item] = self.sensitive_items[item].copy()
         self.list_item = np.concatenate((self.list_item, self.sensitive_label))
 
-    def remove_fake_items(self, k):
-        for i in range(k, self.dim_dataset + self.num_sensitive_items):
+    def remove_fake_items(self):
+        for i in range(self.k, self.dim_dataset + self.num_sensitive_items):
             self.list_item = np.delete(self.list_item, np.where(self.list_item == -i))
             self.band_matrix.drop(columns=i, axis=1, inplace=True)
 
@@ -107,8 +108,9 @@ class Dataset:
             # print("SENSITIVE index", self.list_sensitive_items)
             self.save_sensitive_items()
 
-            k = len(self.list_item) + num_sens_items
-            for i in range(k, dim_dataset + num_sens_items):
+            self.k = len(self.list_item) + num_sens_items
+
+            for i in range(self.k, dim_dataset + num_sens_items):
                 self.list_item = np.append(self.list_item, values=-i)
                 self.dataset[i] = 0
 
@@ -120,7 +122,7 @@ class Dataset:
             permutation_list_item_index = list()
 
             for i in random_col:
-                if i >= k:
+                if i >= self.k:
                     permutation_list_item_index.append(i - num_sens_items)
                 else:
                     permutation_list_item_index.append(i)
@@ -164,8 +166,8 @@ class Dataset:
         print(f"Bandwidth after RCM: {band_bandwidth}")
         print(f"Bandwidth reduction: {default_bandwidth - band_bandwidth}")
 
-        # if fake_item_added:
-        #    self.remove_fake_items(k)
+        #if fake_item_added:
+        #    self.remove_fake_items()
 
         self.add_sensitive_items()
         return self.band_matrix

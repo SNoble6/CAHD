@@ -1,7 +1,7 @@
 clf(figure(1));
 clear;
 clc;
-fileID = fopen('time_value_no_rcm_10000_BMS1.txt', 'r');
+fileID = fopen('final_kl_fake.txt', 'r');
 formatSpec = '%f';
 time = fscanf(fileID, formatSpec);
 time = time.';
@@ -25,9 +25,9 @@ plot(parameters, time, 'color', 'black')
 axis padded;
 title('BMS1')
 xlabel('p')
-ylabel('Time')
+ylabel('KL-Divergence')
 
-fileID = fopen('time_value_rcm_10000_BMS1.txt', 'r');
+fileID = fopen('final_kl_true.txt', 'r');
 formatSpec = '%f';
 time = fscanf(fileID, formatSpec);
 time = time.';
@@ -42,53 +42,9 @@ parameters = fscanf(fileID, formatSpec);
 fclose(fileID);
 parameters = parameters.';
 
-h = plot(parameters, time, 'square', 'color', 'red');
+h = plot(parameters, time, 'square', 'color', 'blue');
 set(h, 'MarkerFaceColor', get(h, 'Color'));
-plot(parameters, time, 'color', 'red');
-legend('no rcm', '10000', 'rcm', '10000');
+plot(parameters, time, 'color', 'blue');
+legend('', 'fake items', '', 'no fake items');
 %axis([4 20 0 1000]);
 
-figure(2);
-hold on;
-fileID = fopen('time_value_no_rcm_1000_BMS1.txt', 'r');
-formatSpec = '%f';
-time = fscanf(fileID, formatSpec);
-time = time.';
-fclose(fileID);
-%fileID = fopen('kl_divergence_value_20_m_BMS2.txt', 'r');
-%kl = fscanf(fileID, formatSpec);
-%fclose(fileID);
-%kl = kl.';
-fileID = fopen('parameters_value_10_p.txt', 'r');
-formatSpec = '%i';
-parameters = fscanf(fileID, formatSpec);
-fclose(fileID);
-parameters = parameters.';
-
-h = plot(parameters, time, 'diamond', 'color', 'blue');
-set(h, 'MarkerFaceColor', get(h, 'Color'));
-plot(parameters, time, 'color', 'blue')
-
-fileID = fopen('time_value_rcm_1000_BMS1.txt', 'r');
-formatSpec = '%f';
-time = fscanf(fileID, formatSpec);
-time = time.';
-fclose(fileID);
-%fileID = fopen('kl_divergence_value_20_m_BMS2.txt', 'r');
-%kl = fscanf(fileID, formatSpec);
-%fclose(fileID);
-%kl = kl.';
-fileID = fopen('parameters_value_10_p.txt', 'r');
-formatSpec = '%i';
-parameters = fscanf(fileID, formatSpec);
-fclose(fileID);
-parameters = parameters.';
-
-h = plot(parameters, time, '*', 'color', '#a83285');
-set(h, 'MarkerFaceColor', get(h, 'Color'));
-plot(parameters, time, 'color', '#a83285')
-legend('no rcm', '1000', 'rcm', '1000');
-axis padded;
-title('BMS1')
-xlabel('p')
-ylabel('Time')
