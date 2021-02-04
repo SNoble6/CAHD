@@ -1,5 +1,5 @@
 # CAHD
-Anonymization of transactional data by using CAHD(Correlation aware Anonymization of High_dimendional Data) on dataset reordered by using RCM (ReverseCuthill-McKee)
+Anonymization of transactional data by using CAHD(Correlation aware Anonymization of High_dimendional Data) on dataset reordered by using RCM (ReverseCuthill-McKee).
 
 ### Prerequisite
 - Data in transactional form (see [transaction matrix](https://github.com/SNoble6/CAHD/blob/main/Dataset/BMS1_transaction_matrix.csv) and [list_item](https://github.com/SNoble6/CAHD/blob/main/Dataset/BMS1_list_item.txt))
